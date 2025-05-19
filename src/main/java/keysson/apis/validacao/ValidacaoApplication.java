@@ -1,13 +1,13 @@
-package keysson.apis.identificacao;
+package keysson.apis.validacao;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class IdentificacaoApplication {
+public class ValidacaoApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(IdentificacaoApplication.class, args);
+		SpringApplication.run(ValidacaoApplication.class, args);
 	}
 
 }
