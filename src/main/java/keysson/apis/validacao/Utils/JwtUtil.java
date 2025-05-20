@@ -12,7 +12,6 @@ import java.util.Date;
 
 @Component
 @Getter
-@AllArgsConstructor
 public class JwtUtil {
 
     @Value("${SECRET_KEY}")
