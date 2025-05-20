@@ -42,10 +42,13 @@ public class AuthService {
 
             int status = user.getStatus();
 
-            /*if (status == 1) {
+            if (status == 1) {
                 validacaoRepository.activeAccount(user.getId(), user.getCompanyId(), user.getUsername());
-            }*/
-            return null;
+            }
+
+            return jwtUtil.generateToken(user.getId(), user.getCompanyId());
+
+
 
     }
 }
