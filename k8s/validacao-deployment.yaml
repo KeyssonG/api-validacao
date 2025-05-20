@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: validacao-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: validacao
+  template:
+    metadata:
+      labels:
+        app: validacao
+    spec:
+      containers:
+        - name: validacao-container
+          image: keyssong/validacao:latest  # 🔹 Buscar no Docker Hub
+          imagePullPolicy: Always           # 🔹 Sempre buscar a versão mais recente
+          ports:
+            - containerPort: 8087

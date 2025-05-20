@@ -14,7 +14,7 @@ import java.util.Date;
 @AllArgsConstructor
 public class JwtUtil {
 
-    private final String SECRET_KEY = "0MEI6P/upC+MtYqAiki5pV0Zwpnm8zo12OLnLK6SQWI=";
+    private final String SECRET_KEY = "SECRET_KEY";
 
     private static final long EXPIRATION_TIME = 1000 * 60 * 60 * 24;
 
