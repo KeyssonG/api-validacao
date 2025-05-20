@@ -8,11 +8,11 @@
 		<version>3.4.5</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>keysson.apis.identificacao</groupId>
-	<artifactId>identificacao</artifactId>
+	<groupId>keysson.apis</groupId>
+	<artifactId>validacao</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>identificacao</name>
-	<description>Demo project for Spring Boot</description>
+	<name>validacao</name>
+	<description>API de validação de usuários</description>
 	<url/>
 	<licenses>
 		<license/>
@@ -63,6 +63,26 @@
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
 			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate.validator</groupId>
+			<artifactId>hibernate-validator</artifactId>
+			<version>8.0.1.Final</version>
+		</dependency>
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt</artifactId>
+			<version>0.9.1</version>
 		</dependency>
 	</dependencies>
 
