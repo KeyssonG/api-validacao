@@ -5,6 +5,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import keysson.apis.validacao.dto.response.LoginResponse;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -14,7 +15,8 @@ import java.util.Date;
 @AllArgsConstructor
 public class JwtUtil {
 
-    private final String SECRET_KEY = "SECRET_KEY";
+    @Value("${SECRET_KEY}")
+    private final String SECRET_KEY;
 
     private static final long EXPIRATION_TIME = 1000 * 60 * 60 * 24;
 
