@@ -2,6 +2,8 @@ package keysson.apis.validacao.model;
 
 import lombok.Data;
 
+import java.util.UUID;
+
 @Data
 public class User {
     private Long id;
@@ -9,4 +11,5 @@ public class User {
     private String username;
     private String password;
     private int status;
+    private UUID consumerId;
 }

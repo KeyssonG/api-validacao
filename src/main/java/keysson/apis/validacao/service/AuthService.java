@@ -28,7 +28,7 @@ public class AuthService {
     }
 
     public LoginResponse login (LoginRequest request) {
-            User user = validacaoRepository.findByUsername(request.getUsername());
+            User user = validacaoRepository.findByUsername(request.getUsername(), request.getIdEmpresa());
 
             if (user == null) {
                 throw new BusinessRuleException(ErrorCode.USER_NOT_FOUND);
@@ -46,7 +46,7 @@ public class AuthService {
                 validacaoRepository.activeAccount(user.getId(), user.getCompanyId(), user.getUsername());
             }
 
-            return jwtUtil.generateToken(user.getId(), user.getCompanyId());
+            return jwtUtil.generateToken(user.getId(), user.getCompanyId(), user.getConsumerId());
 
 
 

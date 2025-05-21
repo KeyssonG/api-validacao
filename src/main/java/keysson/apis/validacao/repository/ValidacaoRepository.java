@@ -19,16 +19,24 @@ public class ValidacaoRepository {
 
 
     private static final String FIND_BY_USERNAME = """
-            SELECT * FROM users
-            WHERE username = ?
+            SELECT
+              u.id,
+              u.company_id,
+              u.username,
+              u.password,
+              u.status,
+              c.consumer_id 
+            FROM users u
+            JOIN companies c ON u.company_id = c.id
+            WHERE u.username = ? AND c.id = ?;
             """;
 
     private static final String ACCOUNT_ACTIVATION = """
             UPDATE USERS SET STATUS = 2 WHERE ID = ? AND COMPANY_ID = ? AND USERNAME = ?
             """;
 
-    public User findByUsername(String username) {
-        return jdbcTemplate.query(FIND_BY_USERNAME, new Object[]{username}, rs -> {
+    public User findByUsername(String username, int idEmpresa) {
+        return jdbcTemplate.query(FIND_BY_USERNAME, new Object[]{username, idEmpresa}, rs -> {
             if (rs.next()) {
                 return userRowMapper.mapRow(rs, 1);
             }
