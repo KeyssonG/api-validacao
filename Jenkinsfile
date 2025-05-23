@@ -82,7 +82,7 @@ pipeline {
 
     post {
         success {
-            echo "Pipeline concluída com sucesso! A imagem 'keyssong/company:latest' foi atualizada e o ArgoCD aplicará as alterações automaticamente. 🚀"
+            echo "Pipeline concluída com sucesso! A imagem 'keyssong/validacao:latest' foi atualizada e o ArgoCD aplicará as alterações automaticamente. 🚀"
         }
         failure {
             echo "Erro na pipeline. Confira os logs para mais detalhes."
