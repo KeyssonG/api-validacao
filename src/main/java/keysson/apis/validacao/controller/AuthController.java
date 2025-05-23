@@ -14,10 +14,10 @@ public interface AuthController {
 
     @PostMapping("/login")
     @Operation(
-            summary = "Autenticar empresa",
-            description = "Endpoint para autenticar uma empresa com username e senha e gerar token JWT.",
+            summary = "Login do usuário",
+            description = "Endpoint que autentica usuário através do username e password, e gera Token.",
             requestBody = @RequestBody(
-                    description = "Dados de login da empresa",
+                    description = "Dados de login do usuário.",
                     required = true,
                     content = @Content(schema = @Schema(implementation = LoginRequest.class))
             )
