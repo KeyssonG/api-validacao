@@ -29,7 +29,7 @@ public class AuthService {
 
     public LoginResponse login (LoginRequest request) {
             User user = validacaoRepository.findByUsername(request.getUsername(), request.getIdEmpresa());
-
+            int statuCompany = validacaoRepository.findStatusCompany(request.getIdEmpresa());
             if (user == null) {
                 throw new BusinessRuleException(ErrorCode.USER_NOT_FOUND);
             }
@@ -41,6 +41,10 @@ public class AuthService {
             }
 
             int status = user.getStatus();
+
+            if (statuCompany == 1) {
+                throw new BusinessRuleException(ErrorCode.CONTA_PENDENTE);
+            }
 
             if (status == 1) {
                 validacaoRepository.activeAccount(user.getId(), user.getCompanyId(), user.getUsername());

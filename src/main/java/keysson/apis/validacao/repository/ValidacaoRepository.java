@@ -35,6 +35,10 @@ public class ValidacaoRepository {
             UPDATE USERS SET STATUS = 2 WHERE ID = ? AND COMPANY_ID = ? AND USERNAME = ?
             """;
 
+    private static final String FIND_STATUS_COMPANY = """
+            SELECT STATUS FROM COMPANIES WHERE STATUS = ?
+            """;
+
     public User findByUsername(String username, int idEmpresa) {
         return jdbcTemplate.query(FIND_BY_USERNAME, new Object[]{username, idEmpresa}, rs -> {
             if (rs.next()) {
@@ -48,6 +52,14 @@ public class ValidacaoRepository {
             jdbcTemplate.update(ACCOUNT_ACTIVATION, idUser, idEmpresa, username);
         } catch (Exception e) {
             throw new BusinessRuleException(ErrorCode.ERROR_ACTIVE_ACCOUNT);
+        }
+    }
+
+    public int findStatusCompany(int idEmpresa) {
+        try {
+            return jdbcTemplate.queryForObject(FIND_STATUS_COMPANY, new Object[]{idEmpresa}, Integer.class);
+        } catch (Exception e) {
+            throw new BusinessRuleException(ErrorCode.ERRO_STATUS_COMPANY);
         }
     }
 }
