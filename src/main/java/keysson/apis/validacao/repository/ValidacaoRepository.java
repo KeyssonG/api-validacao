@@ -36,7 +36,7 @@ public class ValidacaoRepository {
             """;
 
     private static final String FIND_STATUS_COMPANY = """
-            SELECT STATUS FROM COMPANIES WHERE STATUS = ?
+            SELECT STATUS FROM COMPANIES WHERE id = ?
             """;
 
     public User findByUsername(String username, int idEmpresa) {
