@@ -1,17 +1,13 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: rabbitmq
+  name: validacao-service
 spec:
   selector:
-    app: rabbitmq
+    app: validacao
   ports:
     - protocol: TCP
-      port: 5672         # Porta pública AMQP
-      targetPort: 5672   # Porta no container
-      name: amqp
-    - protocol: TCP
-      port: 15672        # Porta pública Painel Web
-      targetPort: 15672  # Porta no container
-      name: dashboard
-  type: LoadBalancer
+      port: 8087
+      targetPort: 8087
+      nodPort: 31002
+  type: LoadBalancer  # Ou NodePort
