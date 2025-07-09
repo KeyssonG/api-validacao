@@ -16,8 +16,11 @@ import org.springframework.stereotype.Service;
 import java.net.http.HttpRequest;
 import java.security.SecureRandom;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.Base64;
+import java.util.Date;
 import java.util.Random;
+
 
 @Service
 public class RegisterService {
@@ -63,10 +66,13 @@ public class RegisterService {
         String plainPassword = generateRandomPassword();
         String encodedPassword = passwordEncoder.encode(plainPassword);
 
+        java.util.Date dataNascimento = requestRegister.getDataNascimento();
+        java.sql.Date sqlDate = new java.sql.Date(dataNascimento.getTime());
+
         FuncionarioRegistroResultado resultado = registerRepository.save(
                 idEmpresa,
                 requestRegister.getNome(),
-                requestRegister.getDataNascimento(),
+                sqlDate,
                 requestRegister.getTelefone(),
                 requestRegister.getEmail(),
                 requestRegister.getCpf(),

@@ -55,7 +55,7 @@ public class RegisterRepository {
         return count != null && count > 0;
     }
 
-    public FuncionarioRegistroResultado save(int idEmprsa, String nome, Date dataNascimento, String telefone, String email,
+    public FuncionarioRegistroResultado save(int idEmprsa, String nome, java.sql.Date dataNascimento, String telefone, String email,
                                              String cpf, String endereco, String sexo, String password,
                                              String username, String departamento, int numeroMatricula) {
 
@@ -66,7 +66,7 @@ public class RegisterRepository {
 
             cs.setInt(1, idEmprsa);
             cs.setString(2, nome);
-            cs.setDate(3, new java.sql.Date(dataNascimento.getTime()));
+            cs.setDate(3, dataNascimento);
             cs.setString(4, telefone);
             cs.setString(5, email);
             cs.setString(6, cpf);
