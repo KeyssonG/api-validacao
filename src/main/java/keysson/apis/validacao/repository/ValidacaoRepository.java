@@ -47,7 +47,7 @@ public class ValidacaoRepository {
             return null;
         });
     }
-    public void activeAccount (Long idUser, Long idEmpresa, String username) {
+    public void activeAccount (int idUser, int idEmpresa, String username) {
         try {
             jdbcTemplate.update(ACCOUNT_ACTIVATION, idUser, idEmpresa, username);
         } catch (Exception e) {

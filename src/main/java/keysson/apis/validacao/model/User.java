@@ -6,8 +6,8 @@ import java.util.UUID;
 
 @Data
 public class User {
-    private Long id;
-    private Long companyId;
+    private int id;
+    private int companyId;
     private String username;
     private String password;
     private int status;

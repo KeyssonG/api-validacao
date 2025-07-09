@@ -50,7 +50,12 @@ public class AuthService {
                 validacaoRepository.activeAccount(user.getId(), user.getCompanyId(), user.getUsername());
             }
 
-            return jwtUtil.generateToken(user.getId(), user.getCompanyId(), user.getConsumerId());
+        String token = jwtUtil.generateToken(
+                user.getId(),
+                user.getCompanyId(),
+                user.getConsumerId());
+
+        return new LoginResponse(token, jwtUtil.getExpirationDate());
 
 
 
