@@ -73,14 +73,14 @@ public class RegisterService {
                 idEmpresa,
                 requestRegister.getNome(),
                 sqlDate,
+                requestRegister.getDepartamento(),
                 requestRegister.getTelefone(),
                 requestRegister.getEmail(),
                 requestRegister.getCpf(),
                 requestRegister.getEndereco(),
                 requestRegister.getSexo(),
-                encodedPassword,
                 requestRegister.getUsername(),
-                requestRegister.getDepartamento(),
+                encodedPassword,
                 numeroMatricula
         );
 
