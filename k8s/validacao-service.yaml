@@ -9,5 +9,5 @@ spec:
     - protocol: TCP
       port: 8087
       targetPort: 8087
-      nodPort: 31002
+      nodePort: 31002
   type: LoadBalancer  # Ou NodePort
