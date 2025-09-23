@@ -61,6 +61,10 @@ public class RegisterService {
             throw new BusinessRuleException(ErrorCode.USERNAME_JA_EXISTE);
         }
 
+        if (registerRepository.existsByEmail(requestRegister.getEmail())) {
+            throw new BusinessRuleException(ErrorCode.EMAIL_JA_CADASTRADO);
+        }
+
         int numeroMatricula = gerarNumeroMatricula();
 
         String plainPassword = generateRandomPassword();

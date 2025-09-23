@@ -1,6 +1,5 @@
 package keysson.apis.validacao.repository;
 
-import jdk.jfr.Registered;
 import keysson.apis.validacao.dto.response.FuncionarioRegistroResultado;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -12,7 +11,6 @@ import javax.sql.DataSource;
 import java.sql.CallableStatement;
 import java.sql.Types;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.Map;
 
 @Repository
@@ -54,6 +52,13 @@ public class RegisterRepository {
         Long count = jdbcTemplate.queryForObject(CHECK_EXISTS_USERNAME, Long.class, name);
         return count != null && count > 0;
     }
+
+    private static final String CHECK_EXISTS_EMAIL = """
+             SELECT COUNT(*)
+             FROM contatos
+             WHERE email = ?
+        """;
+
 
     public FuncionarioRegistroResultado save(int idEmpresa, String nome, java.sql.Date dataNascimento, String departamento, String telefone, String email,
                                              String cpf, String endereco, String sexo, String username, String password, int numeroMatricula) {
@@ -106,6 +111,11 @@ public class RegisterRepository {
 
     public boolean existsByRegistration(int numeroMatricula) {
         Long count = jdbcTemplate.queryForObject(CHECK_EXISTS_NUMERO_MATRICULA, Long.class, numeroMatricula);
+        return count != null && count > 0;
+    }
+
+    public boolean existsByEmail(String email) {
+        Long count = jdbcTemplate.queryForObject(CHECK_EXISTS_EMAIL, Long.class, email);
         return count != null && count > 0;
     }
 }
