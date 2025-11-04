@@ -1,47 +1,43 @@
 package keysson.apis.validacao.repository;
 
+import keysson.apis.validacao.dto.request.RequestUpdateEmployee;
 import keysson.apis.validacao.dto.response.FuncionarioRegistroResultado;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.SqlOutParameter;
 import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.stereotype.Repository;
 
-import javax.sql.DataSource;
 import java.sql.CallableStatement;
+import java.sql.SQLException;
 import java.sql.Types;
-import java.util.Arrays;
-import java.util.Map;
+import java.util.*;
 
 @Repository
 public class RegisterRepository {
 
     private final JdbcTemplate jdbcTemplate;
 
-    @Autowired
-    private DataSource dataSource;
-
     public RegisterRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    private static final String CHECK_EXISTS_CPF= """
-        SELECT COUNT(*) 
-        FROM funcionarios 
-        WHERE cpf = ?
-        """;
+    private static final String CHECK_EXISTS_CPF = """
+            SELECT COUNT(*)
+            FROM funcionarios
+            WHERE cpf = ?
+            """;
 
-    private static final String CHECK_EXISTS_USERNAME= """
-        SELECT COUNT(*)
-        FROM USERS
-        WHERE username  = ? and company_id = 0
-        """;
+    private static final String CHECK_EXISTS_USERNAME = """
+            SELECT COUNT(*)
+            FROM USERS
+            WHERE username  = ? and company_id = 0
+            """;
 
     private static final String CHECK_EXISTS_NUMERO_MATRICULA = """
-             SELECT COUNT(*)
-             FROM users
-             WHERE conta_matricula = ?
-        """;
+                 SELECT COUNT(*)
+                 FROM users
+                 WHERE conta_matricula = ?
+            """;
 
     public boolean existsByCpf(String cpf) {
         Long count = jdbcTemplate.queryForObject(CHECK_EXISTS_CPF, Long.class, cpf);
@@ -54,10 +50,10 @@ public class RegisterRepository {
     }
 
     private static final String CHECK_EXISTS_EMAIL = """
-             SELECT COUNT(*)
-             FROM contatos
-             WHERE email = ?
-        """;
+                 SELECT COUNT(*)
+                 FROM contatos
+                 WHERE email = ?
+            """;
 
 
     public FuncionarioRegistroResultado save(int idEmpresa, String nome, java.sql.Date dataNascimento, String departamento, String telefone, String email,
@@ -80,8 +76,8 @@ public class RegisterRepository {
             cs.setString(10, username);
             cs.setString(11, password);
             cs.setInt(12, numeroMatricula);
-            cs.registerOutParameter(13, java.sql.Types.INTEGER); // out_result
-            cs.registerOutParameter(14, java.sql.Types.INTEGER); // out_user_id
+            cs.registerOutParameter(13, java.sql.Types.INTEGER);
+            cs.registerOutParameter(14, java.sql.Types.INTEGER);
             return cs;
         }, Arrays.asList(
                 new SqlParameter("p_id_empresa", Types.INTEGER),
@@ -117,5 +113,66 @@ public class RegisterRepository {
     public boolean existsByEmail(String email) {
         Long count = jdbcTemplate.queryForObject(CHECK_EXISTS_EMAIL, Long.class, email);
         return count != null && count > 0;
+    }
+
+    public Integer updateEmployee(RequestUpdateEmployee request, Integer idEmpresa) {
+        final String sql = "CALL proc_atualizar_funcionario(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+        Map<String, Object> result = jdbcTemplate.call(connection -> {
+            try {
+                CallableStatement cs = connection.prepareCall(sql);
+
+                cs.setInt(1, request.getId().intValue());
+                cs.setInt(2, idEmpresa);
+                cs.setString(3, request.getNome());
+                cs.setString(4, request.getDepartamento());
+                cs.setString(5, request.getTelefone());
+                cs.setString(6, request.getEmail());
+                cs.setString(7, request.getCpf());
+                cs.setString(8, request.getEndereco());
+                cs.setString(9, request.getSexo());
+
+                Optional.ofNullable(request.getDataNascimento())
+                        .map(Date::getTime)
+                        .map(java.sql.Date::new)
+                        .ifPresentOrElse(
+                                date -> {
+                                    try {
+                                        cs.setDate(10, date);
+                                    } catch (SQLException e) {
+                                        throw new RuntimeException("Erro ao definir data de nascimento.", e);
+                                    }
+                                },
+                                () -> {
+                                    try {
+                                        cs.setNull(10, Types.DATE);
+                                    } catch (SQLException e) {
+                                        throw new RuntimeException("Erro ao definir data nula.", e);
+                                    }
+                                }
+                        );
+
+                cs.registerOutParameter(11, Types.INTEGER);
+                return cs;
+            } catch (SQLException e) {
+                throw new RuntimeException("Erro ao executar procedure.", e);
+            }
+        }, List.of(
+                new SqlParameter("p_user_id", Types.INTEGER),
+                new SqlParameter("p_id_empresa", Types.INTEGER),
+                new SqlParameter("p_nome", Types.VARCHAR),
+                new SqlParameter("p_departamento", Types.VARCHAR),
+                new SqlParameter("p_telefone", Types.VARCHAR),
+                new SqlParameter("p_email", Types.VARCHAR),
+                new SqlParameter("p_cpf", Types.VARCHAR),
+                new SqlParameter("p_endereco", Types.VARCHAR),
+                new SqlParameter("p_sexo", Types.VARCHAR),
+                new SqlParameter("p_data_nascimento", Types.DATE),
+                new SqlOutParameter("out_result", Types.INTEGER)
+        ));
+
+        return Optional.ofNullable(result.get("out_result"))
+                .map(o -> (Integer) o)
+                .orElse(0);
     }
 }

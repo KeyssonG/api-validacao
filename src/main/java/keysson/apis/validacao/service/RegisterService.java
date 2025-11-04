@@ -4,25 +4,26 @@ import jakarta.servlet.http.HttpServletRequest;
 import keysson.apis.validacao.Utils.JwtUtil;
 import keysson.apis.validacao.dto.FuncionarioCadastradoEvent;
 import keysson.apis.validacao.dto.request.RequestRegister;
+import keysson.apis.validacao.dto.request.RequestUpdateEmployee;
 import keysson.apis.validacao.dto.response.FuncionarioRegistroResultado;
 import keysson.apis.validacao.exception.BusinessRuleException;
 import keysson.apis.validacao.exception.enums.ErrorCode;
 import keysson.apis.validacao.repository.RegisterRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.net.http.HttpRequest;
 import java.security.SecureRandom;
 import java.sql.SQLException;
-import java.text.SimpleDateFormat;
 import java.util.Base64;
-import java.util.Date;
+import java.util.Optional;
 import java.util.Random;
 
 
 @Service
+@Slf4j
 public class RegisterService {
 
     private final RegisterRepository registerRepository;
@@ -44,7 +45,7 @@ public class RegisterService {
         this.rabbitService = rabbitService;
     }
 
-    public void registerEmployee (RequestRegister requestRegister) throws BusinessRuleException, SQLException {
+    public void registerEmployee(RequestRegister requestRegister) throws BusinessRuleException, SQLException {
 
         String token = (String) httpRequest.getAttribute("CleanJwt");
 
@@ -109,6 +110,7 @@ public class RegisterService {
             throw new BusinessRuleException(ErrorCode.ERRO_CADASTRAR);
         }
     }
+
     private int gerarNumeroMatricula() {
         Random random = new Random();
         int numero;
@@ -125,5 +127,27 @@ public class RegisterService {
         byte[] bytes = new byte[12];
         random.nextBytes(bytes);
         return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes).substring(0, 12);
+    }
+
+    public void updateEmployeeData(RequestUpdateEmployee request) throws SQLException {
+        String token = (String) httpRequest.getAttribute("CleanJwt");
+        Integer idEmpresa = Optional.ofNullable(jwtUtil.extractCompanyId(token))
+                .orElseThrow(() -> new IllegalArgumentException("ID da empresa não encontrado no token."));
+
+        Integer userId = Optional.ofNullable(request.getId())
+                .map(Long::intValue)
+                .orElse(null);
+
+        log.info("Atualizando funcionário userId={}, companyId={}, nome={}, departamento={}, cpf={}, sexo={}",
+                userId, idEmpresa, request.getNome(), request.getDepartamento(), request.getCpf(), request.getSexo());
+
+        Integer result = registerRepository.updateEmployee(request, idEmpresa);
+
+        Optional.ofNullable(result)
+                .filter(r -> r == 0)
+                .ifPresentOrElse(
+                        r -> log.info("Funcionário atualizado com sucesso. userId={}", userId),
+                        () -> log.warn("Procedure de atualização retornou código inesperado: {} para userId={}", result, userId)
+                );
     }
 }
