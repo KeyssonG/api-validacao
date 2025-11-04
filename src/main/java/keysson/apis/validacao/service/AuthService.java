@@ -1,7 +1,7 @@
 package keysson.apis.validacao.service;
 
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import keysson.apis.validacao.Utils.JwtUtil;
 import keysson.apis.validacao.dto.PasswordResetEvent;
 import keysson.apis.validacao.dto.request.LoginRequest;

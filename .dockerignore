@@ -1,0 +1,57 @@
+# Arquivos de build e compilação
+target/
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+
+# IDEs e editores
+.idea/
+.vscode/
+*.iml
+*.iws
+*.ipr
+.project
+.classpath
+.settings/
+*.swp
+*.swo
+*~
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Docker
+Dockerfile*
+.dockerignore
+docker-compose*.yml
+
+# Documentação
+README.md
+*.md
+
+# CI/CD
+Jenkinsfile
+.github/
+.gitlab-ci.yml
+
+# Testes
+*.log
+logs/
+
+# Arquivos temporários
+*.tmp
+*.temp
+.DS_Store
+Thumbs.db
+
+# Kubernetes
+k8s/
+*.yaml
+*.yml
+
+# Maven wrapper (não precisa no contexto)
+.mvn/wrapper/maven-wrapper.jar

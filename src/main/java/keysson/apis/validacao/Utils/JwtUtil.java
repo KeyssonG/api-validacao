@@ -3,6 +3,7 @@ package keysson.apis.validacao.Utils;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -14,15 +15,19 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 @Component
 @Getter
+@Slf4j
 public class JwtUtil {
-
-    @Value("${SECRET_KEY}")
 
     private static final long EXPIRATION_TIME = MILLISECONDS.toMillis(86400000);
     private final Key key;
+    private final JwtParser jwtParser;
 
     public JwtUtil(@Value("${SECRET_KEY}") String secretKey) {
         this.key = Keys.hmacShaKeyFor(secretKey.getBytes());
+        // Cache do parser para reutilização (reduz alocação de memória)
+        this.jwtParser = Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build();
     }
 
     public String generateToken(int id, int companyId, UUID consumerId) {
@@ -38,16 +43,13 @@ public class JwtUtil {
                 .signWith(key)
                 .compact();
     }
+    
     public Date getExpirationDate() {
         return new Date(System.currentTimeMillis() + EXPIRATION_TIME);
     }
 
     public Claims extractAllClaims(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(key)
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
+        return jwtParser.parseClaimsJws(token).getBody();
     }
 
     public Integer extractUserId(String token) {
@@ -69,19 +71,16 @@ public class JwtUtil {
 
     public boolean isTokenValid(String token) {
         try {
-            Jwts.parserBuilder()
-                    .setSigningKey(key)
-                    .build()
-                    .parseClaimsJws(token);
+            jwtParser.parseClaimsJws(token);
             return true;
         } catch (ExpiredJwtException e) {
-            System.err.println("Token expirado em: " + e.getClaims().getExpiration());
+            log.debug("Token expirado em: {}", e.getClaims().getExpiration());
         } catch (MalformedJwtException e) {
-            System.err.println("Token malformado: " + e.getMessage());
-        } catch (SignatureException e) {
-            System.err.println("Assinatura inválida. Chave correta?");
+            log.debug("Token malformado: {}", e.getMessage());
+        } catch (io.jsonwebtoken.security.SignatureException e) {
+            log.debug("Assinatura inválida. Chave correta?");
         } catch (Exception e) {
-            System.err.println("Erro inesperado: " + e.getClass() + " - " + e.getMessage());
+            log.debug("Erro inesperado: {} - {}", e.getClass(), e.getMessage());
         }
         return false;
     }
