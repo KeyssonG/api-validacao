@@ -18,3 +18,8 @@ spec:
           imagePullPolicy: Always           # 🔹 Sempre buscar a versão mais recente
           ports:
             - containerPort: 8087
+          envFrom:
+            - configMapRef:
+                name: app-config
+            - secretRef:
+                name: app-secret  
