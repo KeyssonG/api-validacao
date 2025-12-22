@@ -16,6 +16,7 @@ pipeline {
     }
 
     stages {
+
         stage('Verificar Branch') {
             when {
                 branch 'master'
@@ -27,7 +28,7 @@ pipeline {
 
         stage('Checkout do Código') {
             steps {
-                git credentialsId: 'Github',
+                git credentialsId: 'github', // corrigido (case-sensitive)
                     url: 'https://github.com/KeyssonG/api-validacao.git',
                     branch: 'master'
             }
@@ -35,57 +36,48 @@ pipeline {
 
         stage('Build da Imagem Docker') {
             steps {
-                sh "docker build -t ${DOCKERHUB_IMAGE}:${IMAGE_TAG} ."
-                sh "docker tag ${DOCKERHUB_IMAGE}:${IMAGE_TAG} ${DOCKERHUB_IMAGE}:latest"
+                bat """
+                wsl docker build -t ${DOCKERHUB_IMAGE}:${IMAGE_TAG} .
+                wsl docker tag ${DOCKERHUB_IMAGE}:${IMAGE_TAG} ${DOCKERHUB_IMAGE}:latest
+                """
             }
         }
 
         stage('Push da Imagem para Docker Hub') {
             steps {
-                 withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                     sh """
-                         echo \$DOCKER_PASS | docker login -u \$DOCKER_USER --password-stdin
-                         docker push ${DOCKERHUB_IMAGE}:${IMAGE_TAG}
-                         docker push ${DOCKERHUB_IMAGE}:latest
-                     """
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: 'dockerhub',
+                        usernameVariable: 'DOCKER_USER',
+                        passwordVariable: 'DOCKER_PASS'
+                    )
+                ]) {
+                    bat """
+                    wsl echo %DOCKER_PASS% | wsl docker login -u %DOCKER_USER% --password-stdin
+                    wsl docker push ${DOCKERHUB_IMAGE}:${IMAGE_TAG}
+                    wsl docker push ${DOCKERHUB_IMAGE}:latest
+                    """
                 }
             }
         }
 
         stage('Atualizar deployment.yaml') {
             steps {
-                script {
-                    def commitSuccess = false
+                bat """
+                wsl sed -i 's|image:.*|image: ${DOCKERHUB_IMAGE}:${IMAGE_TAG}|g' ${DEPLOYMENT_FILE}
 
-                    sh """
-                        sed -i 's|image:.*|image: ${DOCKERHUB_IMAGE}:${IMAGE_TAG}|g' ${DEPLOYMENT_FILE}
-                    """
-
-                    sh """
-                        git config user.email "jenkins@pipeline.com"
-                        git config user.name "Jenkins"
-                        git add "${DEPLOYMENT_FILE}"
-                        git diff --cached --quiet || git commit -m "Atualiza imagem Docker para latest"
-                    """
-
-                    commitSuccess = sh(script: 'git diff --cached --quiet && echo "no-changes" || echo "changed"', returnStdout: true).trim() == "changed"
-
-                    if (commitSuccess) {
-                        echo "Alterações no arquivo de deployment detectadas. Commit realizado."
-                    } else {
-                        echo "Nenhuma alteração detectada no arquivo de deployment. Não foi realizado commit."
-                    }
-                }
+                wsl git config user.email "jenkins@pipeline.com"
+                wsl git config user.name "Jenkins"
+                wsl git add ${DEPLOYMENT_FILE}
+                wsl git diff --cached --quiet || wsl git commit -m "Atualiza imagem Docker para latest"
+                """
             }
         }
     }
 
     post {
         success {
-            echo "Pipeline concluída com sucesso! A imagem 'keyssong/validacao:latest' foi atualizada e o ArgoCD aplicará as alterações automaticamente. 🚀"
+            echo "Pipeline concluída com sucesso! A imagem '${DOCKERHUB_IMAGE}:latest' foi atualizada e o ArgoCD aplicará as alterações automaticamente. 🚀"
         }
         failure {
-            echo "Erro na pipeline. Confira os logs para mais detalhes."
-        }
-    }
-}
+            echo "Erro na pipeline. Con
