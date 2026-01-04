@@ -3,8 +3,8 @@ pipeline {
 
     environment {
         DOCKERHUB_IMAGE = "keyssong/validacao"
-        DEPLOYMENT_FILE = "k8s/validacao-deployment.yaml"
         IMAGE_TAG = "latest"
+        DEPLOYMENT_FILE = "k8s/validacao-deployment.yaml"
     }
 
     triggers {
@@ -28,18 +28,16 @@ pipeline {
 
         stage('Checkout do Código') {
             steps {
-                git credentialsId: 'github', // corrigido (case-sensitive)
-                    url: 'https://github.com/KeyssonG/api-validacao.git',
-                    branch: 'master'
+                checkout scm
             }
         }
 
         stage('Build da Imagem Docker') {
             steps {
-                bat """
-                wsl docker build -t ${DOCKERHUB_IMAGE}:${IMAGE_TAG} .
-                wsl docker tag ${DOCKERHUB_IMAGE}:${IMAGE_TAG} ${DOCKERHUB_IMAGE}:latest
-                """
+                sh '''
+                    docker build -t $DOCKERHUB_IMAGE:$IMAGE_TAG .
+                    docker tag $DOCKERHUB_IMAGE:$IMAGE_TAG $DOCKERHUB_IMAGE:latest
+                '''
             }
         }
 
@@ -52,32 +50,55 @@ pipeline {
                         passwordVariable: 'DOCKER_PASS'
                     )
                 ]) {
-                    bat """
-                    wsl echo %DOCKER_PASS% | wsl docker login -u %DOCKER_USER% --password-stdin
-                    wsl docker push ${DOCKERHUB_IMAGE}:${IMAGE_TAG}
-                    wsl docker push ${DOCKERHUB_IMAGE}:latest
-                    """
+                    sh '''
+                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                        docker push $DOCKERHUB_IMAGE:$IMAGE_TAG
+                        docker push $DOCKERHUB_IMAGE:latest
+                    '''
                 }
             }
         }
 
-        stage('Atualizar deployment.yaml') {
+        stage('Atualizar deployment.yaml (GitOps)') {
             steps {
-                bat """
-                wsl sed -i 's|image:.*|image: ${DOCKERHUB_IMAGE}:${IMAGE_TAG}|g' ${DEPLOYMENT_FILE}
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: 'GitHub',
+                        usernameVariable: 'GIT_USER',
+                        passwordVariable: 'GIT_TOKEN'
+                    )
+                ]) {
+                    sh '''
+                        git checkout master
 
-                wsl git config user.email "jenkins@pipeline.com"
-                wsl git config user.name "Jenkins"
-                wsl git add ${DEPLOYMENT_FILE}
-                wsl git diff --cached --quiet || wsl git commit -m "Atualiza imagem Docker para latest"
-                """
+                        git config user.email "jenkins@pipeline.com"
+                        git config user.name "Jenkins"
+
+                        git remote set-url origin https://$GIT_USER:$GIT_TOKEN@github.com/KeyssonG/api-validacao.git
+
+                        sed -i "s|image:.*|image: $DOCKERHUB_IMAGE:$IMAGE_TAG|" $DEPLOYMENT_FILE
+
+                        git add $DEPLOYMENT_FILE
+
+                        if ! git diff --cached --quiet; then
+                            git commit -m "Atualiza imagem Docker para latest"
+                            git push origin master
+                            echo "Alterações detectadas e enviadas ao repositório."
+                        else
+                            echo "Nenhuma alteração detectada no deployment.yaml"
+                        fi
+                    '''
+                }
             }
         }
     }
 
     post {
         success {
-            echo "Pipeline concluída com sucesso! A imagem '${DOCKERHUB_IMAGE}:latest' foi atualizada e o ArgoCD aplicará as alterações automaticamente. 🚀"
+            echo "🚀 Pipeline concluída com sucesso! Imagem atualizada e GitOps acionado via ArgoCD."
         }
         failure {
-            echo "Erro na pipeline. Con
+            echo "❌ Erro na pipeline. Verifique os logs."
+        }
+    }
+}
