@@ -36,6 +36,8 @@ public class SecurityConfig {
                         .requestMatchers("/login").permitAll()
                         .requestMatchers( "/reset-senha/solicitar").permitAll()
                         .requestMatchers( "/reset-senha/confirmar").permitAll()
+                        .requestMatchers("/actuator/prometheus").permitAll()
+                        .requestMatchers("/actuator/health").permitAll()
                         .anyRequest().authenticated()
                 )
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
