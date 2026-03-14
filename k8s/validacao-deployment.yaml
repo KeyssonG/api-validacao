@@ -1,18 +1,25 @@
-apiVersion: monitoring.coreos.com/v1
-kind: ServiceMonitor
+apiVersion: apps/v1
+kind: Deployment
 metadata:
-  name: validacao-servicemonitor
-  namespace: monitoring
-  labels:
-    release: monitoring
+  name: validacao-deployment
 spec:
+  replicas: 1
   selector:
     matchLabels:
       app: validacao
-  namespaceSelector:
-    matchNames:
-      - producao
-  endpoints:
-    - port: http
-      path: /actuator/prometheus
-      interval: 15s
+  template:
+    metadata:
+      labels:
+        app: validacao
+    spec:
+      containers:
+        - name: validacao-container
+          image: keyssong/validacao:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8087
+          envFrom:
+            - configMapRef:
+                name: app-config
+            - secretRef:
+                name: app-secret
