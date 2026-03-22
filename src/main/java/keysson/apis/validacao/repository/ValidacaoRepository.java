@@ -148,6 +148,14 @@ public class ValidacaoRepository {
                 });
     }
 
+    public void markTokenAsUsed(String token) throws SQLException {
+        try {
+            jdbcTemplate.update(MARK_TOKEN_AS_USED, token);
+        } catch (Exception ex) {
+            throw new SQLException("Erro ao marcar token como usado: " + ex.getMessage(), ex);
+        }
+    }
+
     private static final String FIND_MODULES_BY_DEPT = """
             SELECT m.nome, m.chave, m.rota, m.icone 
             FROM config_permissao_modulo cpm 
