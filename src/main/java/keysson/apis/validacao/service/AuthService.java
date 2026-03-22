@@ -64,12 +64,19 @@ public class AuthService {
                 validacaoRepository.activeAccount(user.getId(), user.getCompanyId(), user.getUsername());
             }
 
+        java.util.List<keysson.apis.validacao.dto.ModuleDTO> authorizedModules = validacaoRepository.findAuthorizedModules(
+                user.getCompanyId(), 
+                user.getDepartment(), 
+                user.getRole()
+        );
+
         String token = jwtUtil.generateToken(
                 user.getId(),
                 user.getCompanyId(),
                 user.getConsumerId(),
                 user.getRole(),
-                user.getDepartment());
+                user.getDepartment(),
+                authorizedModules);
 
         return new LoginResponse(token, jwtUtil.getExpirationDate());
 

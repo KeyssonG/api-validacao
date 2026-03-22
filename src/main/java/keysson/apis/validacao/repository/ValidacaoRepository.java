@@ -148,11 +148,35 @@ public class ValidacaoRepository {
                 });
     }
 
-    public void markTokenAsUsed(String token) throws SQLException {
-        try {
-            jdbcTemplate.update(MARK_TOKEN_AS_USED, token);
-        } catch (Exception ex) {
-            throw new SQLException("Erro ao marcar token como usado: " + ex.getMessage(), ex);
+    private static final String FIND_MODULES_BY_DEPT = """
+            SELECT m.nome, m.chave, m.rota, m.icone 
+            FROM config_permissao_modulo cpm 
+            JOIN modulos m ON cpm.modulo_id = m.id 
+            WHERE cpm.company_id = ? AND cpm.nome_departamento = ?;
+            """;
+
+    private static final String FIND_ALL_MODULES = "SELECT nome, chave, rota, icone FROM modulos;";
+
+    public java.util.List<keysson.apis.validacao.dto.ModuleDTO> findAuthorizedModules(int companyId, String department, String role) {
+        if ("ADMIN".equalsIgnoreCase(role)) {
+            return jdbcTemplate.query(FIND_ALL_MODULES, (rs, rowNum) -> 
+                new keysson.apis.validacao.dto.ModuleDTO(
+                    rs.getString("nome"),
+                    rs.getString("chave"),
+                    rs.getString("rota"),
+                    rs.getString("icone")
+                )
+            );
         }
+        
+        if (department == null) return java.util.Collections.emptyList();
+        
+        return jdbcTemplate.query(FIND_MODULES_BY_DEPT, new Object[]{companyId, department}, (rs, rowNum) -> 
+            new keysson.apis.validacao.dto.ModuleDTO(
+                rs.getString("nome"),
+                rs.getString("chave"),
+                rs.getString("rota"),
+                rs.getString("icone")
+            )
+        );
     }
-}
