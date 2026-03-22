@@ -33,9 +33,12 @@ public class ValidacaoRepository {
               u.username,
               u.password,
               u.status,
-              c.consumer_id 
+              c.consumer_id,
+              u.role,
+              f.departamento
             FROM users u
             JOIN companies c ON u.company_id = c.id
+            LEFT JOIN funcionarios f ON u.id = f.id
             WHERE u.username = ? AND c.id = ?;
             """;
 
@@ -51,11 +54,13 @@ public class ValidacaoRepository {
     private static final String FIND_USER_BY_EMAIL = """
             SELECT\s
                 u.id, u.company_id, u.username, u.password, u.status,\s
-                c.consumer_id, u.primeiro_acesso
+                c.consumer_id, u.primeiro_acesso,
+                u.role, f.departamento
             FROM\s
                 users u
                 JOIN companies c ON u.company_id = c.id
                 JOIN contatos ct ON u.id = ct.user_id
+                LEFT JOIN funcionarios f ON u.id = f.id
             WHERE\s
                 ct.email = ?
             LIMIT 1

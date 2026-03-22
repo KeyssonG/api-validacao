@@ -59,7 +59,7 @@ public class RegisterRepository {
     public FuncionarioRegistroResultado save(int idEmpresa, String nome, java.sql.Date dataNascimento, Integer departamento, String telefone, String email,
                                              String cpf, String endereco, String sexo, String username, String password, int numeroMatricula) {
 
-        String sql = "CALL proc_cadastrar_funcionario(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "CALL proc_cadastrar_funcionario(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         Map<String, Object> result = jdbcTemplate.call(connection -> {
             CallableStatement cs = connection.prepareCall(sql);
@@ -76,8 +76,9 @@ public class RegisterRepository {
             cs.setString(10, username);
             cs.setString(11, password);
             cs.setInt(12, numeroMatricula);
-            cs.registerOutParameter(13, java.sql.Types.INTEGER);
+            cs.setString(13, "USER"); // Default role
             cs.registerOutParameter(14, java.sql.Types.INTEGER);
+            cs.registerOutParameter(15, java.sql.Types.INTEGER);
             return cs;
         }, Arrays.asList(
                 new SqlParameter("p_id_empresa", Types.INTEGER),
@@ -92,6 +93,7 @@ public class RegisterRepository {
                 new SqlParameter("p_username", Types.VARCHAR),
                 new SqlParameter("p_password", Types.VARCHAR),
                 new SqlParameter("p_numero_matricula", Types.INTEGER),
+                new SqlParameter("p_role", Types.VARCHAR),
                 new SqlOutParameter("out_result", Types.INTEGER),
                 new SqlOutParameter("out_user_id", Types.INTEGER)
         ));
