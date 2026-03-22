@@ -30,7 +30,7 @@ public class JwtUtil {
                 .build();
     }
 
-    public String generateToken(int id, int companyId, UUID consumerId) {
+    public String generateToken(int id, int companyId, UUID consumerId, String role, String department) {
         Date now = new Date();
         Date expiration = new Date(now.getTime() + EXPIRATION_TIME);
 
@@ -38,6 +38,8 @@ public class JwtUtil {
                 .claim("id", id)
                 .claim("companyId", companyId)
                 .claim("consumerId", consumerId.toString())
+                .claim("role", role)
+                .claim("department", department)
                 .setIssuedAt(now)
                 .setExpiration(expiration)
                 .signWith(key)

@@ -67,7 +67,9 @@ public class AuthService {
         String token = jwtUtil.generateToken(
                 user.getId(),
                 user.getCompanyId(),
-                user.getConsumerId());
+                user.getConsumerId(),
+                user.getRole(),
+                user.getDepartment());
 
         return new LoginResponse(token, jwtUtil.getExpirationDate());
 

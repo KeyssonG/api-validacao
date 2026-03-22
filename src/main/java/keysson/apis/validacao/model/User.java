@@ -12,4 +12,6 @@ public class User {
     private String password;
     private int status;
     private UUID consumerId;
+    private String role;
+    private String department;
 }
