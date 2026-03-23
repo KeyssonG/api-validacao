@@ -22,7 +22,7 @@ public class JwtUtil {
     private final Key key;
     private final JwtParser jwtParser;
 
-    public JwtUtil(@Value("${SECRET_KEY}") String secretKey) {
+    public JwtUtil(@Value("C6slIxtVM5y1mBrCphrqygYNVoN7t5V/03NVfJddayQ=") String secretKey) {
         this.key = Keys.hmacShaKeyFor(secretKey.getBytes());
         // Cache do parser para reutilização (reduz alocação de memória)
         this.jwtParser = Jwts.parserBuilder()
