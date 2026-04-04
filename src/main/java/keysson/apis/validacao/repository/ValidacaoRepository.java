@@ -33,12 +33,9 @@ public class ValidacaoRepository {
               u.username,
               u.password,
               u.status,
-              c.consumer_id,
-              u.role,
-              f.departamento
+              c.consumer_id 
             FROM users u
             JOIN companies c ON u.company_id = c.id
-            LEFT JOIN funcionarios f ON u.id = f.id
             WHERE u.username = ? AND c.id = ?;
             """;
 
@@ -54,13 +51,11 @@ public class ValidacaoRepository {
     private static final String FIND_USER_BY_EMAIL = """
             SELECT\s
                 u.id, u.company_id, u.username, u.password, u.status,\s
-                c.consumer_id, u.primeiro_acesso,
-                u.role, f.departamento
+                c.consumer_id, u.primeiro_acesso
             FROM\s
                 users u
                 JOIN companies c ON u.company_id = c.id
                 JOIN contatos ct ON u.id = ct.user_id
-                LEFT JOIN funcionarios f ON u.id = f.id
             WHERE\s
                 ct.email = ?
             LIMIT 1
@@ -154,38 +149,5 @@ public class ValidacaoRepository {
         } catch (Exception ex) {
             throw new SQLException("Erro ao marcar token como usado: " + ex.getMessage(), ex);
         }
-    }
-
-    private static final String FIND_MODULES_BY_DEPT = """
-            SELECT m.nome, m.chave, m.rota, m.icone 
-            FROM config_permissao_modulo cpm 
-            JOIN modulos m ON cpm.modulo_id = m.id 
-            WHERE cpm.company_id = ? AND cpm.nome_departamento = ?;
-            """;
-
-    private static final String FIND_ALL_MODULES = "SELECT nome, chave, rota, icone FROM modulos;";
-
-    public java.util.List<keysson.apis.validacao.dto.ModuleDTO> findAuthorizedModules(int companyId, String department, String role) {
-        if ("ADMIN".equalsIgnoreCase(role)) {
-            return jdbcTemplate.query(FIND_ALL_MODULES, (rs, rowNum) -> 
-                new keysson.apis.validacao.dto.ModuleDTO(
-                    rs.getString("nome"),
-                    rs.getString("chave"),
-                    rs.getString("rota"),
-                    rs.getString("icone")
-                )
-            );
-        }
-        
-        if (department == null) return java.util.Collections.emptyList();
-        
-        return jdbcTemplate.query(FIND_MODULES_BY_DEPT, new Object[]{companyId, department}, (rs, rowNum) -> 
-            new keysson.apis.validacao.dto.ModuleDTO(
-                rs.getString("nome"),
-                rs.getString("chave"),
-                rs.getString("rota"),
-                rs.getString("icone")
-            )
-        );
     }
 }
