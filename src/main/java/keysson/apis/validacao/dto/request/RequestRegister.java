@@ -43,7 +43,7 @@ public class RequestRegister {
 
     private String username;
 
-    @NotBlank(message = "Departamento que o funcionário pertence")
-    private String departamento;
+    @NotBlank(message = " Id do departamento que o funcionário pertence")
+    private Integer departamento;
 }
 

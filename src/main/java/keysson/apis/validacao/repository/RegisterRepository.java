@@ -56,7 +56,7 @@ public class RegisterRepository {
             """;
 
 
-    public FuncionarioRegistroResultado save(int idEmpresa, String nome, java.sql.Date dataNascimento, String departamento, String telefone, String email,
+    public FuncionarioRegistroResultado save(int idEmpresa, String nome, java.sql.Date dataNascimento, Integer departamento, String telefone, String email,
                                              String cpf, String endereco, String sexo, String username, String password, int numeroMatricula) {
 
         String sql = "CALL proc_cadastrar_funcionario(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
@@ -67,7 +67,7 @@ public class RegisterRepository {
             cs.setInt(1, idEmpresa);
             cs.setString(2, nome);
             cs.setDate(3, dataNascimento);
-            cs.setString(4, departamento);
+            cs.setInt(4, departamento);
             cs.setString(5, telefone);
             cs.setString(6, email);
             cs.setString(7, cpf);

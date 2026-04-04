@@ -43,7 +43,7 @@ public class JwtUtil {
                 .signWith(key)
                 .compact();
     }
-    
+
     public Date getExpirationDate() {
         return new Date(System.currentTimeMillis() + EXPIRATION_TIME);
     }
@@ -85,4 +85,3 @@ public class JwtUtil {
         return false;
     }
 }
-
