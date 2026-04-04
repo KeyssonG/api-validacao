@@ -22,7 +22,7 @@ public class JwtUtil {
     private final Key key;
     private final JwtParser jwtParser;
 
-    public JwtUtil(@Value("C6slIxtVM5y1mBrCphrqygYNVoN7t5V/03NVfJddayQ=") String secretKey) {
+    public JwtUtil(@Value("${SECRET_KEY}") String secretKey) {
         this.key = Keys.hmacShaKeyFor(secretKey.getBytes());
         // Cache do parser para reutilização (reduz alocação de memória)
         this.jwtParser = Jwts.parserBuilder()
@@ -43,7 +43,7 @@ public class JwtUtil {
                 .signWith(key)
                 .compact();
     }
-    
+
     public Date getExpirationDate() {
         return new Date(System.currentTimeMillis() + EXPIRATION_TIME);
     }
@@ -85,4 +85,3 @@ public class JwtUtil {
         return false;
     }
 }
-
