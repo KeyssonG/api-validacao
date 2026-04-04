@@ -30,17 +30,14 @@ public class JwtUtil {
                 .build();
     }
 
-    public String generateToken(int id, int companyId, java.util.UUID consumerId, String role, String department, java.util.List<keysson.apis.validacao.dto.ModuleDTO> modules) {
-        java.util.Date now = new java.util.Date();
-        java.util.Date expiration = new java.util.Date(now.getTime() + EXPIRATION_TIME);
+    public String generateToken(int id, int companyId, UUID consumerId) {
+        Date now = new Date();
+        Date expiration = new Date(now.getTime() + EXPIRATION_TIME);
 
-        return io.jsonwebtoken.Jwts.builder()
+        return Jwts.builder()
                 .claim("id", id)
                 .claim("companyId", companyId)
                 .claim("consumerId", consumerId.toString())
-                .claim("role", role)
-                .claim("department", department)
-                .claim("modules", modules)
                 .setIssuedAt(now)
                 .setExpiration(expiration)
                 .signWith(key)

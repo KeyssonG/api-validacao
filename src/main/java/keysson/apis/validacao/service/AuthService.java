@@ -42,41 +42,32 @@ public class AuthService {
     }
 
     public LoginResponse login (LoginRequest request) {
-            User user = validacaoRepository.findByUsername(request.getUsername(), request.getIdEmpresa());
-            int statuCompany = validacaoRepository.findStatusCompany(request.getIdEmpresa());
-            if (user == null) {
-                throw new BusinessRuleException(ErrorCode.USER_NOT_FOUND);
-            }
+        User user = validacaoRepository.findByUsername(request.getUsername(), request.getIdEmpresa());
+        int statuCompany = validacaoRepository.findStatusCompany(request.getIdEmpresa());
+        if (user == null) {
+            throw new BusinessRuleException(ErrorCode.USER_NOT_FOUND);
+        }
 
-            Boolean checkPassword = passwordEncoder.matches(request.getPassword(), user.getPassword());
+        Boolean checkPassword = passwordEncoder.matches(request.getPassword(), user.getPassword());
 
-            if (checkPassword == false) {
-                throw new BusinessRuleException(ErrorCode.BAD_PASSWORD);
-            }
+        if (checkPassword == false) {
+            throw new BusinessRuleException(ErrorCode.BAD_PASSWORD);
+        }
 
-            int status = user.getStatus();
+        int status = user.getStatus();
 
-            if (statuCompany == 1) {
-                throw new BusinessRuleException(ErrorCode.CONTA_PENDENTE);
-            }
+        if (statuCompany == 1) {
+            throw new BusinessRuleException(ErrorCode.CONTA_PENDENTE);
+        }
 
-            if (status == 1) {
-                validacaoRepository.activeAccount(user.getId(), user.getCompanyId(), user.getUsername());
-            }
-
-        java.util.List<keysson.apis.validacao.dto.ModuleDTO> authorizedModules = validacaoRepository.findAuthorizedModules(
-                user.getCompanyId(), 
-                user.getDepartment(), 
-                user.getRole()
-        );
+        if (status == 1) {
+            validacaoRepository.activeAccount(user.getId(), user.getCompanyId(), user.getUsername());
+        }
 
         String token = jwtUtil.generateToken(
                 user.getId(),
                 user.getCompanyId(),
-                user.getConsumerId(),
-                user.getRole(),
-                user.getDepartment(),
-                authorizedModules);
+                user.getConsumerId());
 
         return new LoginResponse(token, jwtUtil.getExpirationDate());
 
