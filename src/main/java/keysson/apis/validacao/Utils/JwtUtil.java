@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import java.security.Key;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
@@ -30,7 +31,7 @@ public class JwtUtil {
                 .build();
     }
 
-    public String generateToken(int id, int companyId, UUID consumerId) {
+    public String generateToken(int id, int companyId, UUID consumerId, List<String> modules) {
         Date now = new Date();
         Date expiration = new Date(now.getTime() + EXPIRATION_TIME);
 
@@ -38,6 +39,7 @@ public class JwtUtil {
                 .claim("id", id)
                 .claim("companyId", companyId)
                 .claim("consumerId", consumerId.toString())
+                .claim("modules", modules)
                 .setIssuedAt(now)
                 .setExpiration(expiration)
                 .signWith(key)

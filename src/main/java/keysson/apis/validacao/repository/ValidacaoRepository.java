@@ -11,6 +11,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Repository
 public class ValidacaoRepository {
@@ -79,6 +80,14 @@ public class ValidacaoRepository {
             UPDATE password_reset_tokens SET used = true WHERE token = ?
             """;
 
+    private static final String FIND_USER_MODULES = """
+            SELECT ms.nome 
+            FROM permissoes_modulo pm
+            INNER JOIN modulos ms ON ms.id = pm.modulo_id
+            WHERE pm.company_id = ?
+              AND pm.user_id = ?
+            """;
+
 
 
     public User findByUsername(String username, int idEmpresa) {
@@ -135,5 +144,9 @@ public class ValidacaoRepository {
 
     public void markTokenAsUsed(String token) {
         jdbcTemplate.update(MARK_TOKEN_AS_USED, token);
+    }
+
+    public List<String> findUserModules(int userId, int idEmpresa) {
+        return jdbcTemplate.queryForList(FIND_USER_MODULES, String.class, idEmpresa, userId);
     }
 }

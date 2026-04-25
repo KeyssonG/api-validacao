@@ -1,7 +1,6 @@
 package keysson.apis.validacao.service;
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.transaction.annotation.Transactional;
 import keysson.apis.validacao.Utils.JwtUtil;
 import keysson.apis.validacao.dto.PasswordResetEvent;
 import keysson.apis.validacao.dto.request.LoginRequest;
@@ -15,8 +14,10 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class AuthService {
@@ -40,16 +41,16 @@ public class AuthService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public LoginResponse login (LoginRequest request) {
+    public LoginResponse login(LoginRequest request) {
         User user = validacaoRepository.findByUsername(request.getUsername(), request.getIdEmpresa());
         int statuCompany = validacaoRepository.findStatusCompany(request.getIdEmpresa());
         if (user == null) {
             throw new BusinessRuleException(ErrorCode.USER_NOT_FOUND);
         }
 
-        Boolean checkPassword = passwordEncoder.matches(request.getPassword(), user.getPassword());
+        boolean checkPassword = passwordEncoder.matches(request.getPassword(), user.getPassword());
 
-        if (checkPassword == false) {
+        if (!checkPassword) {
             throw new BusinessRuleException(ErrorCode.BAD_PASSWORD);
         }
 
@@ -63,13 +64,15 @@ public class AuthService {
             validacaoRepository.activeAccount(user.getId(), user.getCompanyId(), user.getUsername());
         }
 
+        List<String> modules = validacaoRepository.findUserModules(user.getId(), request.getIdEmpresa());
+
         String token = jwtUtil.generateToken(
                 user.getId(),
                 user.getCompanyId(),
-                user.getConsumerId());
+                user.getConsumerId(),
+                modules);
 
         return new LoginResponse(token, jwtUtil.getExpirationDate());
-
     }
 
     @Transactional
@@ -92,7 +95,6 @@ public class AuthService {
 
     @Transactional
     public void requestPasswordChange(String email) {
-
         // Busca o usuário pelo username e email na tabela contatos
         User user = validacaoRepository.findByUsernameAndEmail(email);
         if (user == null) {
