@@ -10,8 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.sql.SQLException;
-
 @RestController
 @RequiredArgsConstructor
 public class AuthControllerImpl implements AuthController{
@@ -25,13 +23,13 @@ public class AuthControllerImpl implements AuthController{
     }
 
     @Override
-    public ResponseEntity<Void> requestPasswordReset(@RequestBody RequestResetPassword request) throws SQLException {
+    public ResponseEntity<Void> requestPasswordReset(@RequestBody RequestResetPassword request) {
         authService.requestPasswordChange(request.getEmail());
         return ResponseEntity.ok().build();
     }
 
     @Override
-    public ResponseEntity<Void> confirmPasswordReset(@RequestBody ConfirmResetPassword request) throws SQLException {
+    public ResponseEntity<Void> confirmPasswordReset(@RequestBody ConfirmResetPassword request) {
         authService.validatePasswordReset(request.getToken(), request.getNewPassword());
         return ResponseEntity.ok().build();
     }

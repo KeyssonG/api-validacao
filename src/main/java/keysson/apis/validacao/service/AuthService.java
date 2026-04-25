@@ -16,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.sql.SQLException;
 import java.time.LocalDateTime;
 
 @Service
@@ -74,7 +73,7 @@ public class AuthService {
     }
 
     @Transactional
-    public void validatePasswordReset(String token, String newPassword) throws SQLException {
+    public void validatePasswordReset(String token, String newPassword) {
         // Busca o token válido
         PasswordResetToken resetToken = validacaoRepository.findValidResetToken(token);
         if (resetToken == null) {
@@ -92,7 +91,7 @@ public class AuthService {
     }
 
     @Transactional
-    public void requestPasswordChange(String email) throws SQLException {
+    public void requestPasswordChange(String email) {
 
         // Busca o usuário pelo username e email na tabela contatos
         User user = validacaoRepository.findByUsernameAndEmail(email);

@@ -5,8 +5,6 @@ import keysson.apis.validacao.dto.MensagensPendentes;
 import keysson.apis.validacao.repository.RabbitRepository;
 import org.springframework.stereotype.Service;
 
-import java.sql.SQLException;
-
 @Service
 public class RabbitService {
 
@@ -17,7 +15,7 @@ public class RabbitService {
         this.rabbitRepository = rabbitRepository;
     }
 
-    public void saveMessagesInBank(FuncionarioCadastradoEvent event, int status) throws SQLException {
+    public void saveMessagesInBank(FuncionarioCadastradoEvent event, int status) {
         MensagensPendentes mensagenPendente = new MensagensPendentes();
         mensagenPendente.setIdEmpresa(event.getIdEmpresa());
         mensagenPendente.setName(event.getName());

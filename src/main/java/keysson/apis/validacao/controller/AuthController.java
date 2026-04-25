@@ -12,8 +12,6 @@ import keysson.apis.validacao.dto.response.LoginResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 
-import java.sql.SQLException;
-
 
 public interface AuthController {
 
@@ -39,7 +37,7 @@ public interface AuthController {
                     content = @Content(schema = @Schema(implementation = RequestResetPassword.class))
             )
     )
-    ResponseEntity<Void> requestPasswordReset(@RequestBody RequestResetPassword request) throws SQLException;
+    ResponseEntity<Void> requestPasswordReset(@RequestBody RequestResetPassword request);
 
     @PostMapping("/reset-senha/confirmar")
     @Operation(
@@ -51,5 +49,5 @@ public interface AuthController {
                     content = @Content(schema = @Schema(implementation = ConfirmResetPassword.class))
             )
     )
-    ResponseEntity<Void> confirmPasswordReset(@RequestBody ConfirmResetPassword request) throws SQLException;
+    ResponseEntity<Void> confirmPasswordReset(@RequestBody ConfirmResetPassword request);
 }

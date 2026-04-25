@@ -4,8 +4,6 @@ import keysson.apis.validacao.dto.MensagensPendentes;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
-import java.sql.SQLException;
-
 @Repository
 public class RabbitRepository {
 
@@ -20,18 +18,14 @@ public class RabbitRepository {
     VALUES (?, ?, ?, ?, ?, ?)
     """;
 
-    public void saveMenssage(MensagensPendentes mensagem) throws SQLException {
-        try {
-            jdbcTemplate.update(INSERT_MENSSAGE,
-                    mensagem.getIdEmpresa(),
-                    mensagem.getName(),
-                    mensagem.getEmail(),
-                    mensagem.getCpf(),
-                    mensagem.getUsername(),
-                    mensagem.getStatus());
-        } catch (Exception ex) {
-            throw new SQLException("Erro ao salvar a mensagem pendente no banco", ex);
-        }
+    public void saveMenssage(MensagensPendentes mensagem) {
+        jdbcTemplate.update(INSERT_MENSSAGE,
+                mensagem.getIdEmpresa(),
+                mensagem.getName(),
+                mensagem.getEmail(),
+                mensagem.getCpf(),
+                mensagem.getUsername(),
+                mensagem.getStatus());
     }
 
 }

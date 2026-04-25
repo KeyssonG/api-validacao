@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
-import java.sql.SQLException;
 import java.time.LocalDateTime;
 
 @Repository
@@ -83,12 +82,12 @@ public class ValidacaoRepository {
 
 
     public User findByUsername(String username, int idEmpresa) {
-        return jdbcTemplate.query(FIND_BY_USERNAME, new Object[]{username, idEmpresa}, rs -> {
+        return jdbcTemplate.query(FIND_BY_USERNAME, rs -> {
             if (rs.next()) {
                 return userRowMapper.mapRow(rs, 1);
             }
             return null;
-        });
+        }, username, idEmpresa);
     }
     public void activeAccount (int idUser, int idEmpresa, String username) {
         try {
@@ -100,54 +99,41 @@ public class ValidacaoRepository {
 
     public int findStatusCompany(int idEmpresa) {
         try {
-            return jdbcTemplate.queryForObject(FIND_STATUS_COMPANY, new Object[]{idEmpresa}, Integer.class);
+            return jdbcTemplate.queryForObject(FIND_STATUS_COMPANY, Integer.class, idEmpresa);
         } catch (Exception e) {
             throw new BusinessRuleException(ErrorCode.ERRO_STATUS_COMPANY);
         }
     }
 
 
-    public void saveNewPassword(String newPassword, Integer userId) throws SQLException {
-        try {
-            jdbcTemplate.update(UPDATE_PASSWORD, newPassword, userId);
-        } catch (Exception ex) {
-            throw new SQLException("Erro ao tentar atualizar a senha" + ex.getMessage(), ex);
-        }
+    public void saveNewPassword(String newPassword, Integer userId) {
+        jdbcTemplate.update(UPDATE_PASSWORD, newPassword, userId);
     }
 
     // Métodos para reset de senha
     public User findByUsernameAndEmail(String email) {
-        return jdbcTemplate.query(FIND_USER_BY_EMAIL, new Object[]{email}, rs -> {
+        return jdbcTemplate.query(FIND_USER_BY_EMAIL, rs -> {
             if (rs.next()) {
                 return userRowMapper.mapRow(rs, 1);
             }
             return null;
-        });
+        }, email);
     }
 
-    public void saveResetToken(Long userId, String token, LocalDateTime expiresAt) throws SQLException {
-        try {
-            jdbcTemplate.update(SAVE_RESET_TOKEN, userId, token, expiresAt, LocalDateTime.now());
-        } catch (Exception ex) {
-            throw new SQLException("Erro ao salvar token de reset de senha: " + ex.getMessage(), ex);
-        }
+    public void saveResetToken(Long userId, String token, LocalDateTime expiresAt) {
+        jdbcTemplate.update(SAVE_RESET_TOKEN, userId, token, expiresAt, LocalDateTime.now());
     }
 
     public PasswordResetToken findValidResetToken(String token) {
-        return jdbcTemplate.query(FIND_VALID_RESET_TOKEN,
-                new Object[]{token, LocalDateTime.now()}, rs -> {
-                    if (rs.next()) {
-                        return passwordResetTokenRowMapper.mapRow(rs, 1);
-                    }
-                    return null;
-                });
+        return jdbcTemplate.query(FIND_VALID_RESET_TOKEN, rs -> {
+            if (rs.next()) {
+                return passwordResetTokenRowMapper.mapRow(rs, 1);
+            }
+            return null;
+        }, token, LocalDateTime.now());
     }
 
-    public void markTokenAsUsed(String token) throws SQLException {
-        try {
-            jdbcTemplate.update(MARK_TOKEN_AS_USED, token);
-        } catch (Exception ex) {
-            throw new SQLException("Erro ao marcar token como usado: " + ex.getMessage(), ex);
-        }
+    public void markTokenAsUsed(String token) {
+        jdbcTemplate.update(MARK_TOKEN_AS_USED, token);
     }
 }
