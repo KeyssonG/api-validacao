@@ -3,25 +3,21 @@ package keysson.apis.validacao.repository;
 import keysson.apis.validacao.dto.request.RequestUpdateEmployee;
 import keysson.apis.validacao.dto.response.FuncionarioRegistroResultado;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
-import org.springframework.jdbc.core.simple.SimpleJdbcCall;
+import org.springframework.jdbc.core.SqlOutParameter;
+import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.stereotype.Repository;
 
+import java.sql.CallableStatement;
+import java.sql.Types;
 import java.util.*;
 
 @Repository
 public class RegisterRepository {
 
     private final JdbcTemplate jdbcTemplate;
-    private final SimpleJdbcCall cadastrarFuncionarioCall;
-    private final SimpleJdbcCall atualizarFuncionarioCall;
 
     public RegisterRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
-        this.cadastrarFuncionarioCall = new SimpleJdbcCall(jdbcTemplate)
-                .withProcedureName("proc_cadastrar_funcionario");
-        this.atualizarFuncionarioCall = new SimpleJdbcCall(jdbcTemplate)
-                .withProcedureName("proc_atualizar_funcionario");
     }
 
     private static final String CHECK_EXISTS_CPF = """
@@ -62,23 +58,41 @@ public class RegisterRepository {
     public FuncionarioRegistroResultado save(int idEmpresa, String nome, java.sql.Date dataNascimento, String departamento, String telefone, String email,
                                              String cpf, String endereco, String sexo, String username, String password, int numeroMatricula) {
 
-        MapSqlParameterSource inParams = new MapSqlParameterSource()
-                .addValue("p_id_empresa", idEmpresa)
-                .addValue("p_nome", nome)
-                .addValue("p_data_nascimento", dataNascimento)
-                .addValue("p_departamento", departamento)
-                .addValue("p_telefone", telefone)
-                .addValue("p_email", email)
-                .addValue("p_cpf", cpf)
-                .addValue("p_endereco", endereco)
-                .addValue("p_sexo", sexo)
-                .addValue("p_username", username)
-                .addValue("p_password", password)
-                .addValue("p_numero_matricula", numeroMatricula);
+        final String sql = "CALL proc_cadastrar_funcionario(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-        Map<String, Object> result = cadastrarFuncionarioCall.execute(inParams);
-
-        System.out.println("Map result: " + result);
+        Map<String, Object> result = jdbcTemplate.call(connection -> {
+            CallableStatement cs = connection.prepareCall(sql);
+            cs.setInt(1, idEmpresa);
+            cs.setString(2, nome);
+            cs.setDate(3, dataNascimento);
+            cs.setString(4, departamento);
+            cs.setString(5, telefone);
+            cs.setString(6, email);
+            cs.setString(7, cpf);
+            cs.setString(8, endereco);
+            cs.setString(9, sexo);
+            cs.setString(10, username);
+            cs.setString(11, password);
+            cs.setInt(12, numeroMatricula);
+            cs.registerOutParameter(13, Types.INTEGER);
+            cs.registerOutParameter(14, Types.INTEGER);
+            return cs;
+        }, Arrays.asList(
+                new SqlParameter("p_id_empresa", Types.INTEGER),
+                new SqlParameter("p_nome", Types.VARCHAR),
+                new SqlParameter("p_data_nascimento", Types.DATE),
+                new SqlParameter("p_departamento", Types.VARCHAR),
+                new SqlParameter("p_telefone", Types.VARCHAR),
+                new SqlParameter("p_email", Types.VARCHAR),
+                new SqlParameter("p_cpf", Types.VARCHAR),
+                new SqlParameter("p_endereco", Types.VARCHAR),
+                new SqlParameter("p_sexo", Types.VARCHAR),
+                new SqlParameter("p_username", Types.VARCHAR),
+                new SqlParameter("p_password", Types.VARCHAR),
+                new SqlParameter("p_numero_matricula", Types.INTEGER),
+                new SqlOutParameter("out_result", Types.INTEGER),
+                new SqlOutParameter("out_user_id", Types.INTEGER)
+        ));
 
         Integer resultCode = (Integer) result.get("out_result");
         Integer idFuncionario = (Integer) result.get("out_user_id");
@@ -98,22 +112,41 @@ public class RegisterRepository {
     }
 
     public Integer updateEmployee(RequestUpdateEmployee request, Integer idEmpresa) {
-        MapSqlParameterSource inParams = new MapSqlParameterSource()
-                .addValue("p_user_id", request.getId().intValue())
-                .addValue("p_id_empresa", idEmpresa)
-                .addValue("p_nome", request.getNome())
-                .addValue("p_departamento", request.getDepartamento())
-                .addValue("p_telefone", request.getTelefone())
-                .addValue("p_email", request.getEmail())
-                .addValue("p_cpf", request.getCpf())
-                .addValue("p_endereco", request.getEndereco())
-                .addValue("p_sexo", request.getSexo())
-                .addValue("p_data_nascimento", Optional.ofNullable(request.getDataNascimento())
-                        .map(Date::getTime)
-                        .map(java.sql.Date::new)
-                        .orElse(null));
+        final String sql = "CALL proc_atualizar_funcionario(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-        Map<String, Object> result = atualizarFuncionarioCall.execute(inParams);
+        Map<String, Object> result = jdbcTemplate.call(connection -> {
+            CallableStatement cs = connection.prepareCall(sql);
+            cs.setInt(1, request.getId().intValue());
+            cs.setInt(2, idEmpresa);
+            cs.setString(3, request.getNome());
+            cs.setString(4, request.getDepartamento());
+            cs.setString(5, request.getTelefone());
+            cs.setString(6, request.getEmail());
+            cs.setString(7, request.getCpf());
+            cs.setString(8, request.getEndereco());
+            cs.setString(9, request.getSexo());
+
+            if (request.getDataNascimento() != null) {
+                cs.setDate(10, new java.sql.Date(request.getDataNascimento().getTime()));
+            } else {
+                cs.setNull(10, Types.DATE);
+            }
+
+            cs.registerOutParameter(11, Types.INTEGER);
+            return cs;
+        }, Arrays.asList(
+                new SqlParameter("p_user_id", Types.INTEGER),
+                new SqlParameter("p_id_empresa", Types.INTEGER),
+                new SqlParameter("p_nome", Types.VARCHAR),
+                new SqlParameter("p_departamento", Types.VARCHAR),
+                new SqlParameter("p_telefone", Types.VARCHAR),
+                new SqlParameter("p_email", Types.VARCHAR),
+                new SqlParameter("p_cpf", Types.VARCHAR),
+                new SqlParameter("p_endereco", Types.VARCHAR),
+                new SqlParameter("p_sexo", Types.VARCHAR),
+                new SqlParameter("p_data_nascimento", Types.DATE),
+                new SqlOutParameter("out_result", Types.INTEGER)
+        ));
 
         return Optional.ofNullable(result.get("out_result"))
                 .map(o -> (Integer) o)
