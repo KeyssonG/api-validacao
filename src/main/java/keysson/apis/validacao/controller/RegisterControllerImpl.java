@@ -9,8 +9,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.sql.SQLException;
-
 @RestController
 @RequiredArgsConstructor
 @Slf4j
@@ -19,12 +17,12 @@ public class RegisterControllerImpl implements RegisterController {
     private final RegisterService registerService;
 
     @Override
-    public void register(@RequestBody RequestRegister requestRegister, String token) throws BusinessRuleException, SQLException {
+    public void register(@RequestBody RequestRegister requestRegister, String token) throws BusinessRuleException {
         registerService.registerEmployee(requestRegister);
     }
 
     @Override
-    public Void updateEmployeeData(String token, @RequestBody RequestUpdateEmployee requestBody) throws BusinessRuleException, SQLException {
+    public Void updateEmployeeData(String token, @RequestBody RequestUpdateEmployee requestBody) throws BusinessRuleException {
         log.info("Recebida requisição para atualizar funcionário id={}", requestBody.getId());
         registerService.updateEmployeeData(requestBody);
         return null;

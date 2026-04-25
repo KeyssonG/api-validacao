@@ -11,8 +11,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 
-import java.sql.SQLException;
-
 public interface RegisterController {
 
     @PostMapping("/cadastrar/funcionario-cliente")
@@ -29,7 +27,7 @@ public interface RegisterController {
     )
     public void register(@RequestBody RequestRegister requestRegister,
                          @RequestHeader("Authorization") String token)
-            throws BusinessRuleException, SQLException;
+            throws BusinessRuleException;
 
 
     @PutMapping("/employee/update")
@@ -40,6 +38,6 @@ public interface RegisterController {
     Void updateEmployeeData(
             @RequestHeader("Authorization") String token,
             @RequestBody RequestUpdateEmployee requestBody
-    ) throws BusinessRuleException, SQLException;
+    ) throws BusinessRuleException;
 }
 

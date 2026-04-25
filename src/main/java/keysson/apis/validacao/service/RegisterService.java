@@ -16,7 +16,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
-import java.sql.SQLException;
 import java.util.Base64;
 import java.util.Optional;
 import java.util.Random;
@@ -45,7 +44,7 @@ public class RegisterService {
         this.rabbitService = rabbitService;
     }
 
-    public void registerEmployee(RequestRegister requestRegister) throws BusinessRuleException, SQLException {
+    public void registerEmployee(RequestRegister requestRegister) throws BusinessRuleException {
 
         String token = (String) httpRequest.getAttribute("CleanJwt");
 
@@ -129,7 +128,7 @@ public class RegisterService {
         return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes).substring(0, 12);
     }
 
-    public void updateEmployeeData(RequestUpdateEmployee request) throws SQLException {
+    public void updateEmployeeData(RequestUpdateEmployee request) {
         String token = (String) httpRequest.getAttribute("CleanJwt");
         Integer idEmpresa = Optional.ofNullable(jwtUtil.extractCompanyId(token))
                 .orElseThrow(() -> new IllegalArgumentException("ID da empresa não encontrado no token."));
